@@ -13,7 +13,7 @@ const reactionsSchema = new mongoose.Schema({
     },
     type:{
         type: String,
-        enum: ["like", "dislike"],
+        enum: ['like', 'dislike'],
         required: true
     }
 },{
@@ -21,6 +21,7 @@ const reactionsSchema = new mongoose.Schema({
 }
 );
 
+// i want one user can do only one like/dislike to a blog 
 reactionsSchema.index({userId: 1, blogId: 1}, {unique: true});
 
 const Reactions = mongoose.model("Reactions", reactionsSchema);

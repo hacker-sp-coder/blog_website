@@ -17,7 +17,7 @@ app.set('view engine', 'ejs');
  
 //routers
 app.use('/api/auth',userRoute) 
-app.use('/api/blog',blogRoute)
+app.use('/api/blog',blogRoute,)
 
 
 export default app;
