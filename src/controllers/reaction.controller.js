@@ -7,7 +7,7 @@ export const toggleReaction = async(req, res) => {
         const { action } = req.body;
         const userId = req.user.id;
 
-        if(action!== 'like' || action!== 'dislike') {
+        if(action!== 'like' && action!== 'dislike') {
             return res.status(400).json({
                 msg: "Invalid action type."
             })
@@ -23,7 +23,7 @@ export const toggleReaction = async(req, res) => {
 
         //if user has already reacted before
         if(prevAction) {
-            if(prevAction === action) {
+            if(prevAction.type === action) {
                 await Reactions.findByIdAndDelete(prevAction._id);
 
                 action === 'like' ? (likeChange= -1): (dislikeChange=-1);
@@ -32,36 +32,43 @@ export const toggleReaction = async(req, res) => {
                 prevAction.type = action;
                 await prevAction.save();
 
-                if(action==='like'){
+                if(action ==='like'){
                     likeChange =1;
                     dislikeChange=-1;
                 }else {
                     likeChange =-1;
                     dislikeChange=1;
                 }
-                responseMsg= `Reaction changed to ${action}`;
+                responseMsg = `Reaction changed to ${action}`;
             }
         }
         else {
-            Reactions.create({
+            await Reactions.create({
                 userId,
                 blogId,
                 type: action
             });
-            action ='like'? (likeChange=1): (dislikeChange=1);
+            action ==='like'? (likeChange=1): (dislikeChange=1);
             responseMsg =`Successfully ${action}d`;
         }
         
-        await Blog.findByIdAndUpdate(blogId,{
+        const updatedBlog = await Blog.findByIdAndUpdate(blogId,{
             $inc: {
                 likes_count: likeChange,
-                dislike_count: dislikeChange
+                dislikes_count: dislikeChange
             }
+        },{
+            new: true
         });
 
+        if(!updatedBlog) {
+            return res.status(404).json({msg: "Blog not found"});
+        }
         return res.status(200).json({
-            msg: "res"
-        })
+            msg: responseMsg,
+            likes: updatedBlog.likes_count,
+            dislikes: updatedBlog.dislike_count
+        });
 
     } catch (error) {
         return res.status(500).json({msg: "server error : ",error})

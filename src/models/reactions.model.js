@@ -25,3 +25,5 @@ const reactionsSchema = new mongoose.Schema({
 reactionsSchema.index({userId: 1, blogId: 1}, {unique: true});
 
 const Reactions = mongoose.model("Reactions", reactionsSchema);
+
+export default Reactions

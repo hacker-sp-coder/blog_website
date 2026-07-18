@@ -17,3 +17,5 @@ const viewsSchema = new mongoose.Schema({
 );
 
 const Views = mongoose.model("Views", viewsSchema);
+
+export default Views;
