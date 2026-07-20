@@ -4,12 +4,12 @@ import express from 'express'
 
 const router = express.Router()
 
-router.post("/register", verifyToken, userController.handleRegister);
+router.post("/register", userController.handleRegister);
 
-router.post("/login", verifyToken, userController.handleLogin);
+router.post("/login", userController.handleLogin);
 
 router.get("/getMe", verifyToken, userController.handleGetMe);
 
-router.get("/getRefreshToken", verifyToken, userController.handleRefreshToken);
+router.get("/getRefreshToken", userController.handleRefreshToken);
 
 export default router;

@@ -4,7 +4,7 @@ import config from "../config/config.js"
 export const verifyToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
-        if (!authorization || !authHeader.StartsWith("Bearer ")) {
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
             return res.status(401).json({
                 msg: "Access denied, No token provided"
             })
@@ -20,7 +20,7 @@ export const verifyToken = async (req, res, next) => {
 
     } catch (error) {
         return res.status(403).json({
-            msg: "Invalid or expired token"
+            msg: "Invalid or expired token  ",
         })
 
     }

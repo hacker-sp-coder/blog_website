@@ -6,7 +6,11 @@ export const createBlog = async (req, res) => {
         const { title, blog_image, content } = req.body;
 
         const authorId = req.user.id;
-
+        if(!title || !content) {
+            return res.status(404).json({
+                msg: "title and content required"
+            })
+        }
         const newBlog = await Blog.create({
             title: title,
             blog_image: blog_image,
@@ -18,6 +22,7 @@ export const createBlog = async (req, res) => {
             msg: "Blog created successfully",
             data: newBlog
         })
+
     } catch (error) {
         res.status(500).json({
             msg: "server error",
@@ -37,7 +42,7 @@ export const getBlogFeed = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-        populate('author', 'username name')
+            .populate('author', 'username name')
             .lean();
 
         // we are taking record of total number of Blogs present in     
@@ -56,4 +61,20 @@ export const getBlogFeed = async (req, res) => {
             error: error
         })
     }
+}
+
+export const incrementViews = async (req, res) => {
+    try {
+        const { blogId } = req.params;
+
+        await Blog.findByIdAndUpdate(blogId, {
+            $inc: { views_count: 1 }
+        });
+
+        return res.status(200).json({ msg: "Views incremented! " })
+    } catch (error) {
+        return res.status(500).json({msg: "server error: ",error})
+    }
+
+
 }

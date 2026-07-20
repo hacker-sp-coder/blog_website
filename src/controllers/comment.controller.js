@@ -3,20 +3,24 @@ import Blog from "../models/blogs.model.js";
 
 export const addComment = async (req, res) => {
     try {
-        const {blogId} = req.params;
-        const {comment_content} = req.body;
+        const { blogId } = req.params;
+        const { comment_content } = req.body;
         const userId = req.user.id;
 
-        if(!comment_content) {
+        if (!comment_content) {
             return res.status(400).json({
                 msg: "comment required"
             })
         }
 
-        const newComment = await Comment.create({
+        const newComment = await Comments.create({
             userId,
             blogId,
             comment_content
+        });
+
+        await Blog.findByIdAndUpdate(blogId, {
+            $inc: { comment_count: 1 }
         });
 
         return res.status(201).json({
@@ -25,27 +29,31 @@ export const addComment = async (req, res) => {
         });
 
     } catch (error) {
-        return res.status(500).json({msg: "server error : ",error})
+        console.log(error);
+
+        return res.status(500).json({ msg: "server error : ", error })
     }
 };
 
-export const getBlogComments = async (req,res) =>{
+export const getBlogComments = async (req, res) => {
     try {
-        const {blogId} = req.params;
+        const { blogId } = req.params;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const skip = (page-1) * 10;
+        const skip = (page - 1) * 10;
 
-        const comments = await Comment.find({blogId})
-            .sort({createdAt: -1})
+        const comments = await Comments.find({ blogId })
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate("userId", "username name") 
+            .populate("userId", "username name")
             .lean();
 
-            return res.status(200).json({msg: "success", data: comments})
+        return res.status(200).json({ msg: "success", data: comments })
 
     } catch (error) {
-        return res.status(500).json({msg: "Server error : ",error});
+        console.log(error);
+
+        return res.status(500).json({ msg: "Server error : ", error: error });
     }
 }

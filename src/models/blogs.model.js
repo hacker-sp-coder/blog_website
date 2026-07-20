@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User from "./user.model";
+import User from "./user.model.js";
 
 const blogSchema = new mongoose.Schema({
     author: {
@@ -30,6 +30,10 @@ const blogSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    views_count: {
+        type: Number,
+        default: 0
+    }
 
 },{
     timestamps: true

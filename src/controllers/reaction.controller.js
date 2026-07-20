@@ -7,7 +7,7 @@ export const toggleReaction = async(req, res) => {
         const { action } = req.body;
         const userId = req.user.id;
 
-        if(action!== 'like' && action!== 'dislike') {
+        if(action!== "like" && action!== "dislike") {
             return res.status(400).json({
                 msg: "Invalid action type."
             })
@@ -67,7 +67,7 @@ export const toggleReaction = async(req, res) => {
         return res.status(200).json({
             msg: responseMsg,
             likes: updatedBlog.likes_count,
-            dislikes: updatedBlog.dislike_count
+            dislikes: updatedBlog.dislikes_count
         });
 
     } catch (error) {
