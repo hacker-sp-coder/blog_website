@@ -1,35 +1,40 @@
-import Blog from "../models/blogs.model.js"
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import Blog from "../models/blogs.model.js";
 
-// creating blog: 
 export const createBlog = async (req, res) => {
     try {
-        const { title, blog_image, content } = req.body;
-
+        const { title, content } = req.body;
         const authorId = req.user.id;
-        if(!title || !content) {
-            return res.status(404).json({
-                msg: "title and content required"
-            })
+
+        // 1. Check if an image was uploaded
+        const localImagePath = req.file?.path;
+        let blogImageUrl = "";
+
+        // 2. If it was, upload to Cloudinary
+        if (localImagePath) {
+            const uploadedImage = await uploadOnCloudinary(localImagePath);
+            if (uploadedImage) {
+                blogImageUrl = uploadedImage.secure_url;
+            }
         }
+
+        // 3. Create the blog with the URL
         const newBlog = await Blog.create({
             title: title,
-            blog_image: blog_image,
+            content: content,
             author: authorId,
-            content: content
+            blog_image: blogImageUrl // Now stores the live Cloudinary URL
         });
 
         return res.status(201).json({
             msg: "Blog created successfully",
             data: newBlog
-        })
+        });
 
     } catch (error) {
-        res.status(500).json({
-            msg: "server error",
-            error: error
-        })
+        res.status(500).json({ msg: "server error", error: error.message });
     }
-}
+} 
 
 // Feed logic:
 export const getBlogFeed = async (req, res) => {
@@ -75,6 +80,5 @@ export const incrementViews = async (req, res) => {
     } catch (error) {
         return res.status(500).json({msg: "server error: ",error})
     }
-
-
 }
+
