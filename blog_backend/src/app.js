@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser"
 import blogRoute from "./routers/blog.route.js"
 import reactionRoute from "./routers/reactions.route.js"
 import commentRoute from "./routers/comments.route.js"
-
+import cors from "cors";
 
 const app = express()
 
@@ -13,8 +13,12 @@ const app = express()
 app.use(express.json())
 
 app.use(morgan('dev'))
-
 app.use(cookieParser())
+
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials:true,
+}))
 
 app.set('view engine', 'ejs');
  
@@ -23,7 +27,5 @@ app.use('/api/auth',userRoute)
 app.use('/api/blog',blogRoute)
 app.use('/api/blog',reactionRoute)
 app.use('/api/blog',commentRoute)
-//app.use('/api/blog', )
-
 
 export default app;
