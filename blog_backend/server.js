@@ -2,7 +2,7 @@ import { log } from 'node:console';
 import app from './src/app.js'
 import db_connection from './src/config/db.js';
 
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 
 db_connection()
 
