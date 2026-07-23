@@ -124,25 +124,32 @@ export const handleLogin = async (req, res) => {
 }
 
 export const handleGetMe = async (req, res) => {
-    // Grab the access token.
-    const access_token = req.headers.authorization?.split(" ")[1];
+    try {
+        // Grab the access token.
+        const access_token = req.headers.authorization?.split(" ")[1];
 
-    // Check if token exist.
-    if (!access_token) {
-        return res.status(404).json({
-            msg: "token not found"
+        // Check if token exist.
+        if (!access_token) {
+            return res.status(404).json({
+                msg: "token not found"
+            })
+        }
+
+        //verify token
+        console.log('Exact token recieved: ', access_token);
+        const decoded = jwt.verify(access_token, config.JWT_SECRET);
+
+        // Retrieve user details from database (excluding the password)
+        const user = await userModel.findById(decoded.id).select("-password");
+
+        return res.status(201).json({
+            msg: "access token recieved",
+            decoded: decoded,
+            user: user
         })
+    } catch (error) {
+        return res.status(500).json({ msg: "server error", error: error.message });
     }
-
-    //verify token
-    console.log('Exact token recieved: ', access_token);
-    const decoded = jwt.verify(access_token, config.JWT_SECRET);
-
-    return res.status(201).json({
-        msg: "access token recieved",
-        decoded: decoded
-    })
-
 }
 
 export const handleRefreshToken = async (req, res) => {

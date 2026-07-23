@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -11,7 +11,6 @@ import {
 import api from '../api/api'
 import CommentSection from '../components/CommentSection'
 import { useReactions } from '../hooks/useReactions'
-
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     weekday: 'long',
@@ -21,37 +20,62 @@ const formatDate = (dateString) => {
   })
 }
 
+let lastViewed = { id: null, time: 0 }
+
 const PostDetail = () => {
   const { id } = useParams()
   const location = useLocation()
   const [post, setPost] = useState(location.state?.post || null)
   const [loading, setLoading] = useState(!location.state?.post)
   const [error, setError] = useState('')
+  const [viewsError, setViewsError] = useState('')
   const { getReaction, toggleReaction, reactingId } = useReactions()
+  const hasViewed = useRef(false)
 
   const userReaction = getReaction(id)
   const isLiked = userReaction === 'like'
   const isDisliked = userReaction === 'dislike'
 
+  // Reset state when ID or route state changes
   useEffect(() => {
+    setPost(location.state?.post || null)
+    setLoading(!location.state?.post)
+    setError('')
+    setViewsError('')
+    hasViewed.current = false
+  }, [id, location.state])
+
+  // Increment view count when the post data is loaded
+  useEffect(() => {
+    if (!post || hasViewed.current) return
+
+    const now = Date.now()
+    // Prevent React StrictMode double-firing by ignoring duplicate mounts within 2 seconds
+    if (lastViewed.id === id && now - lastViewed.time < 2000) {
+      return
+    }
+    lastViewed = { id, time: now }
+
     const incrementView = async () => {
-      const viewedKey = `viewed_${id}`
-      if (sessionStorage.getItem(viewedKey)) return
+      hasViewed.current = true
 
       try {
         await api.post(`/blog/views/${id}`)
-        sessionStorage.setItem(viewedKey, 'true')
+        
+        // Optimistically update the UI view count immediately after successful API hit
         setPost((prev) =>
           prev ? { ...prev, views_count: (prev.views_count ?? 0) + 1 } : prev,
         )
-      } catch {
-        // View increment is non-critical
+      } catch (err) {
+        console.error("View increment error:", err)
+        setViewsError(err.response?.data?.msg || err.message)
       }
     }
 
     incrementView()
-  }, [id])
+  }, [id, post])
 
+  // Fetch post data if not already present in the location state
   useEffect(() => {
     if (post) return
 
@@ -62,7 +86,7 @@ const PostDetail = () => {
 
         while (currentPage <= totalPages) {
           const { data } = await api.get('/blog/feed', {
-            params: { page: currentPage, limit: 10 },
+            params: { page: currentPage, limit: 10, _t: Date.now() },
           })
 
           totalPages = data.totalPages
@@ -204,6 +228,7 @@ const PostDetail = () => {
           <div className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-500 dark:text-slate-400">
             <Eye size={18} />
             <span>{post.views_count ?? 0} views</span>
+            {viewsError && <span className="text-xs text-red-500">({viewsError})</span>}
           </div>
         </div>
       </article>

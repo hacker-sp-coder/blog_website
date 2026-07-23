@@ -25,7 +25,7 @@ const Profile = () => {
 
       while (currentPage <= totalPages) {
         const { data } = await api.get('/blog/feed', {
-          params: { page: currentPage, limit: 10 },
+          params: { page: currentPage, limit: 10, _t: Date.now() },
         })
 
         totalPages = data.totalPages
@@ -53,10 +53,10 @@ const Profile = () => {
   }
 
   useEffect(() => {
-    if (activeTab === 'posts' && !postsLoaded) {
+    if (user?.id && !postsLoaded) {
       fetchMyPosts()
     }
-  }, [activeTab, postsLoaded, user?.id])
+  }, [postsLoaded, user?.id])
 
   const handleReaction = (blogId, action) => {
     toggleReaction(blogId, action, (likes, dislikes) => {

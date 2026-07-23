@@ -42,15 +42,23 @@ export const AuthProvider = ({ children }) => {
     }
 
     const { data } = await api.get('/auth/getMe')
-    const userData = { id: data.decoded.id }
+    const userData = {
+      id: data.decoded.id,
+      name: data.user?.name,
+      username: data.user?.username,
+      email: data.user?.email,
+      about_yourSelf: data.user?.about_yourSelf
+    }
     setUser(userData)
 
     const stored = loadStoredProfile()
     if (stored?.id === userData.id) {
-      setProfile(stored)
+      const updatedProfile = { ...stored, ...userData }
+      setProfile(updatedProfile)
+      persistProfile(updatedProfile)
     } else {
-      setProfile({ id: userData.id })
-      persistProfile({ id: userData.id })
+      setProfile(userData)
+      persistProfile(userData)
     }
 
     return userData

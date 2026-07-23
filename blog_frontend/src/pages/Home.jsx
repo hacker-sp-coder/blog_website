@@ -19,7 +19,7 @@ const Home = () => {
       else setLoading(true)
 
       const { data } = await api.get('/blog/feed', {
-        params: { page: pageNum, limit: 10 },
+        params: { page: pageNum, limit: 10, _t: Date.now() },
       })
 
       setPosts((prev) => (append ? [...prev, ...data.data] : data.data))
