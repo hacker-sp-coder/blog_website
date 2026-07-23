@@ -7,6 +7,5 @@ const PORT = process.env.PORT || 8000;
 db_connection()
 
 app.listen(PORT, () =>{
-    console.log('server listening at http://localhost:8000');
-    
+    console.log(`server listening at http://localhost:${PORT}`);
 })
