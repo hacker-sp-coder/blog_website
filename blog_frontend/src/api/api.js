@@ -58,7 +58,7 @@ api.interceptors.response.use(
     isRefreshing = true
 
     try {
-      const { data } = await axios.get('/api/auth/getRefreshToken', {
+      const { data } = await axios.get('https://blog-website-mk83.onrender.com/api/auth/getRefreshToken', {
         withCredentials: true,
       })
 
